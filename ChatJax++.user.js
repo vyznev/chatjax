@@ -3,10 +3,13 @@
 // @namespace   https://github.com/vyznev/
 // @description Enable MathJax in Stack Exchange chat
 // @author      Ilmari Karonen
-// @version     0.1.4
-// @copyright   2014, Ilmari Karonen (http://stackapps.com/users/10283/ilmari-karonen)
+// @version     0.1.5
+// @copyright   2014-2015, Ilmari Karonen (http://stackapps.com/users/10283/ilmari-karonen)
 // @license     ISC; http://opensource.org/licenses/ISC
 // @match       *://chat.stackexchange.com/*
+// @homepageURL https://github.com/vyznev/chatjax
+// @updateURL   https://github.com/vyznev/chatjax/raw/master/ChatJax%2B%2B.user.js
+// @downloadURL https://github.com/vyznev/chatjax/raw/master/ChatJax%2B%2B.user.js
 // @grant       none
 // ==/UserScript==
 
@@ -99,6 +102,12 @@ var chatJaxSetup = function () {
 	}
 	else console.log("ChatJax++: TODO: Implement non-SOUP functionality!");
 };
+
+// CSS hack to get rid of spurious scroll bars on Firefox/Win:
+var styleHack = document.createElement( 'style' );
+styleHack.type = 'text/css';
+styleHack.textContent = "div.message .full, div.message .partial { padding-bottom: 2px }";
+document.head.appendChild( styleHack );
 
 // Inject MathJax config and chat polling code to page:
 var configScript = document.createElement( 'script' );
