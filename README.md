@@ -9,3 +9,5 @@ Note that this user script is still under development.  Some issues to be fixed 
 * ChatJax++ currently runs in all chat rooms, not just those associated with sites using MathJax.
 * Also, the MathJax config is hardcoded, so site-specific variations in MathJax syntax are not yet supported.  (As of v0.1.7, the hardcoded config does include mhchem, though.)
 * There is currently no way to toggle MathJax processing on and off (except by disabling ChatJax++ in you user script manager and reloading the page).
+
+Users with [Greasemonkey](https://addons.mozilla.org/firefox/addon/greasemonkey/) (Firefox) / [Tampermonkey](https://chrome.google.com/webstore/detail/tampermonkey/dhdgffkkebhmkfjojejmpbldmpobfkfo) (Chrome) installed may [install this user script by clicking this link.](https://github.com/vyznev/chatjax/raw/master/ChatJax%2B%2B.user.js)
