@@ -3,7 +3,7 @@
 // @namespace   https://github.com/vyznev/
 // @description Enable MathJax in Stack Exchange chat
 // @author      Ilmari Karonen
-// @version     0.1.6
+// @version     0.1.7
 // @copyright   2014-2015, Ilmari Karonen (http://stackapps.com/users/10283/ilmari-karonen)
 // @license     ISC; http://opensource.org/licenses/ISC
 // @match       *://chat.stackexchange.com/*
@@ -47,7 +47,7 @@ var mathJaxURL = "//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTM
 var config = {
 	"HTML-CSS": { preferredFont: "TeX", availableFonts: ["STIX","TeX"], linebreaks: { automatic:true }, EqnChunk: 50 },
 	tex2jax: { inlineMath: [ ["$", "$"], ["\\\\(","\\\\)"] ], displayMath: [ ["$$","$$"], ["\\[", "\\]"] ], processEscapes: true, ignoreClass: "tex2jax_ignore|dno" },
-	TeX: {  noUndefined: { attributes: { mathcolor: "red", mathbackground: "#FFEEEE", mathsize: "90%" } }, Macros: { href: "{}" } },
+	TeX: { extensions: ["mhchem.js"], noUndefined: { attributes: { mathcolor: "red", mathbackground: "#FFEEEE", mathsize: "90%" } }, Macros: { href: "{}" } },
 	messageStyle: "none"
 };
 
