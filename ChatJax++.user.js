@@ -3,7 +3,7 @@
 // @namespace   https://github.com/vyznev/
 // @description Enable MathJax in Stack Exchange chat
 // @author      Ilmari Karonen
-// @version     0.1.7
+// @version     0.1.8
 // @copyright   2014-2015, Ilmari Karonen (http://stackapps.com/users/10283/ilmari-karonen)
 // @license     ISC; http://opensource.org/licenses/ISC
 // @match       *://chat.stackexchange.com/*
@@ -42,14 +42,27 @@
 // Opera does not support @match, so re-check that we're on SE chat before doing anything
 if ( location.hostname != 'chat.stackexchange.com' ) return;
 
-// TODO: dynamically load config and MathJax URL from main site
+// Baseline MathJax URL and config, copied from SE:
 var mathJaxURL = "//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML-full";
 var config = {
 	"HTML-CSS": { preferredFont: "TeX", availableFonts: ["STIX","TeX"], linebreaks: { automatic:true }, EqnChunk: 50 },
 	tex2jax: { inlineMath: [ ["$", "$"], ["\\\\(","\\\\)"] ], displayMath: [ ["$$","$$"], ["\\[", "\\]"] ], processEscapes: true, ignoreClass: "tex2jax_ignore|dno" },
-	TeX: { extensions: ["mhchem.js"], noUndefined: { attributes: { mathcolor: "red", mathbackground: "#FFEEEE", mathsize: "90%" } }, Macros: { href: "{}" } },
+	TeX: { noUndefined: { attributes: { mathcolor: "red", mathbackground: "#FFEEEE", mathsize: "90%" } }, Macros: { href: "{}" } },
 	messageStyle: "none"
 };
+
+// List of MathJax enabled sites from http://meta.stackexchange.com/a/216607:
+var mathJaxSites = /^(https?:)?\/\/(meta\.)?((astronomy|aviation|biology|chemistry|codereview|cogsci|crypto|cs(theory)?|dsp|earthscience|electronics|engineering|ham|math(educators|ematica)?|physics|puzzling|quant|robotics|scicomp|space|stats|worldbuilding)\.stackexchange\.com|mathoverflow\.net)(\/|$)/;
+
+var footerLink = document.querySelector('#footer-logo a');
+if ( !footerLink ) return;
+var match = mathJaxSites.exec( footerLink.href );
+if ( !match ) return;
+
+// Some sites have special config options:
+if ( /^(biology|chemistry)\./.test( match[3] ) ) config.TeX.extensions = ['mhchem.js'];
+if ( /^(codereview|electronics)\./.test( match[3] ) ) config.tex2jax.inlineMath = [ ["\\$", "\\$"] ];
+
 
 // Chat polling code:
 var chatJaxSetup = function () {
@@ -71,13 +84,14 @@ var chatJaxSetup = function () {
 				switch ( e.event_type ) {
 					case 1: case 2: case 20: id = 'message-' + e.message_id; break;
 					case 6: id = 'starred-posts'; break;
+					case 22: id = 'feed-ticker'; break;
 				}
 				if ( !id || seen[id] ) return;
 				seen[id] = true;
 				
 				if ( id != 'starred-posts' ) {
 					MathJax.Hub.Queue( ['Typeset', MathJax.Hub, id] );
-				} else setInterval( function () {
+				} else setTimeout( function () {
 					// XXX: for some reason, starred posts need an extra delay :(
 					MathJax.Hub.Queue( ['Typeset', MathJax.Hub, id] );
 				}, 10 );
