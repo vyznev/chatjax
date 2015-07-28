@@ -3,7 +3,7 @@
 // @namespace   https://github.com/vyznev/
 // @description Enable MathJax in Stack Exchange chat
 // @author      Ilmari Karonen
-// @version     0.1.5
+// @version     0.1.6
 // @copyright   2014-2015, Ilmari Karonen (http://stackapps.com/users/10283/ilmari-karonen)
 // @license     ISC; http://opensource.org/licenses/ISC
 // @match       *://chat.stackexchange.com/*
