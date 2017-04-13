@@ -3,7 +3,7 @@
 // @namespace   https://github.com/vyznev/
 // @description Enable MathJax in Stack Exchange chat
 // @author      Ilmari Karonen
-// @version     0.2.0
+// @version     0.2.1
 // @copyright   2014-2017, Ilmari Karonen (http://stackapps.com/users/10283/ilmari-karonen)
 // @license     ISC; http://opensource.org/licenses/ISC
 // @match       *://chat.stackexchange.com/*
@@ -139,7 +139,7 @@ var chatJaxSetup = function () {
 };
 
 // Extract parent site URL from footer:
-var footerLink = document.querySelector('#footer-logo a');
+var footerLink = document.querySelector('#footer-logo a, #transcript-logo a');
 if ( !footerLink ) return;
 var match = /^((?:https?:)?\/\/((?:[0-9A-Za-z\-]+\.)*(?:stackexchange\.com|mathoverflow\.net)))(\/|$)/.exec( footerLink.href );
 if ( !match ) return;
