@@ -3,7 +3,7 @@
 // @namespace   https://github.com/vyznev/
 // @description Enable MathJax in Stack Exchange chat
 // @author      Ilmari Karonen
-// @version     0.2.1
+// @version     0.3.0
 // @copyright   2014-2017, Ilmari Karonen (http://stackapps.com/users/10283/ilmari-karonen)
 // @license     ISC; http://opensource.org/licenses/ISC
 // @match       *://chat.stackexchange.com/*
@@ -78,63 +78,59 @@ var injectChatJax = function ( siteName, siteConfig ) {
 
 // Chat polling code, will be injected as a MathJax config script:
 var chatJaxSetup = function () {
-	if ( !window.CHAT ) return;
-	if ( !window.SOUP ) {
-		console.log("ChatJax++ TODO: Implement non-SOUP functionality!");
+	// XXX: is this check too late?
+	if ( !window.CHAT || !window.$ || !$.fn || !$.fn.jquery ) {
+		console.log( 'ChatJax++ failed find CHAT or jQuery object, aborting' );
 		return;
 	}
-	SOUP.hookChat( function ( json ) { try {
-		var data = JSON.parse( json );
-		var room = data['r' + CHAT.CURRENT_ROOM_ID];
-		if ( !room || !room.e || !room.e.forEach ) return;
-		var seen = {};
-		room.e.forEach( function ( e ) {
-			var id = null;
-			switch ( e.event_type ) {
-				// http://paste.ubuntu.com/12785810/
-				case 1: case 2: case 20: id = 'message-' + e.message_id; break;
-				case 6: id = 'starred-posts'; break;
-				case 22: id = 'feed-ticker'; break;
-				case 3: case 4: case 8: case 25: case 30: case 34: return;  // ignore user events
-				// default: console.log( 'ChatJax++ got unrecognized event', e );
-			}
-			if ( !id || seen[id] ) return;
-			seen[id] = true;
+	
+	// don't automatically typeset the whole page
+	MathJax.Hub.Config( { skipStartupTypeset: true } );
 
-			if ( id != 'starred-posts' ) {
-				MathJax.Hub.Queue( ['Typeset', MathJax.Hub, id] );
-			} else setTimeout( function () {
-				// XXX: for some reason, starred posts need an extra delay :(
-				MathJax.Hub.Queue( ['Typeset', MathJax.Hub, id] );
-			}, 10 );
-		} );
-	} catch (e) { console.log( 'ChatJax++ error:', e ); } } );
+	// root nodes whose descendants we're watching
+	var rootSelector = '#chat, #transcript, #ticker-items, #starred-posts ul';
+	// intermediate nodes between roots and leaves
+	var branchSelector = '.monologue, .messages, .message';
+	// nodes that may actually contain mathjax
+	var leafSelector = '.content, .ticker-item, li[id^="summary_"]';
+	// these nodes are effectively both roots and leaves are the same time
+	var extraSelector = '#roomname, #roomdesc';
 
-	// re-typeset content loaded via AJAX to avoid race conditions
-	SOUP.hookAjax( /^\/chats\/\d+\/events\b/, function () {
-		MathJax.Hub.Queue( ['Typeset', MathJax.Hub ] );
-	} );
-	SOUP.hookAjax( /^\/chats\/stars\/\d+\b/, function () {
-		MathJax.Hub.Queue( ['Typeset', MathJax.Hub, 'starred-posts' ] );
-	}, 10 );
-	SOUP.hookAjax( /^\/rooms\/thumbs\/\d+\b/, function () {
-		MathJax.Hub.Queue( ['Typeset', MathJax.Hub, 'roomdesc' ] );
-	}, 10 );
+	// XXX: leaves also count as branches in the code below!
+	branchSelector += ', ' + leafSelector;
 
-	// also catch expansion of collapsed posts
-	var urlRegexp = /^\/messages\/(\d+)\/(\d+)\b/;
-	SOUP.hookAjax( urlRegexp, function ( event, xhr, settings ) {
-		var match = urlRegexp.exec( settings.url );
-		if ( !match || match[1] != CHAT.CURRENT_ROOM_ID ) return;
-		MathJax.Hub.Queue( ['Typeset', MathJax.Hub, 'message-' + match[2] ] );
-	} );
+	var config = { childList: true };
+	var observer = new MutationObserver( observeMutations );
 
-	// don't parse MathJax in sidebar (except for starred posts and room description)
-	var sidebar = document.getElementById('sidebar');
-	if (sidebar) sidebar.className += ' tex2jax_ignore';
+	// TODO: somehow ignore mutations triggered by MathJax itself
+	
+	function observeMutations ( mutations ) {
+		for ( var i = 0; i < mutations.length; i++ ) {
+			var mutation = mutations[i];
+			// console.log( 'ChatJax++ observed', mutation.type, mutation.target, mutation.addedNodes || "n/a" );
+			// if this is a leaf or extra node, just re-typeset it whenever anything changes
+			var target = $( mutation.target );
+			if ( target.is( leafSelector ) || target.is( extraSelector ) ) return target.each( mathJaxify );
+			// else watch any new leaf or branch children...
+			var added = $( mutation.addedNodes ).filter( branchSelector );
+			added.each( startObserving ).find( branchSelector ).each( startObserving );
+			// ...and typeset any new leaves
+			added.filter( leafSelector ).each( mathJaxify );
+			added.not( leafSelector ).find( leafSelector ).each( mathJaxify );
+		}
+	}
+	function startObserving () { observer.observe( this, config ) }	
 
-	MathJax.Hub.Queue( ['Typeset', MathJax.Hub, 'starred-posts' ] );
-	MathJax.Hub.Queue( ['Typeset', MathJax.Hub, 'roomdesc' ] );
+	var possibleTexDelims = /\$|\\\[|\\begin/;
+	function mathJaxify() { 
+		// optimization: don't try to typeset anything that clearly contains no TeX markup
+		if ( ! possibleTexDelims.test( this.textContent ) ) return;
+		MathJax.Hub.Queue( ['Typeset', MathJax.Hub, this] );
+	}
+	
+	$( rootSelector ).each( startObserving ).find( branchSelector ).each( startObserving );
+	$( rootSelector ).find( leafSelector ).each( mathJaxify );
+	$( extraSelector ).each( startObserving ).each( mathJaxify );
 	console.log( 'ChatJax++ setup complete' );
 };
 
