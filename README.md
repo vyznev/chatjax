@@ -12,10 +12,9 @@ Some notable features of ChatJax++ include:
 
 Note that ChatJax++ is still under development.  Some issues to be fixed before v1.0 include:
 
-* ChatJax++ currently requires [SOUP](https://github.com/vyznev/soup) in order to capture chat events.
 * There is currently no way to manually enable or disable MathJax in a particular chat room (except by marking the room's URL as excluded in your user script manager).
-* There's a possible race condition, where messages that you post yourself may sometimes not display MathJax correctly.  Unfortunately, reliably reproducing this issue seems tricky.
+* There's a possible race condition, where messages that you post yourself may sometimes not display MathJax correctly.  Unfortunately, reliably reproducing this issue seems tricky.  This *may* have been fixed by ChatJax++ v0.3, but I can't be 100% sure of it.
 
-Users with [Greasemonkey](https://addons.mozilla.org/firefox/addon/greasemonkey/) (Firefox) or [Tampermonkey](https://tampermonkey.net/) (Chrome and other browsers) installed may [install this user script by clicking this link.](https://github.com/vyznev/chatjax/raw/master/ChatJax%2B%2B.user.js)  Remember to also [install SOUP](https://github.com/vyznev/soup/raw/master/SOUP.user.js), if you don't have it already.
+Users with [Greasemonkey](https://addons.mozilla.org/firefox/addon/greasemonkey/) (Firefox) or [Tampermonkey](https://tampermonkey.net/) (Chrome and other browsers) installed may [install this user script by clicking this link.](https://github.com/vyznev/chatjax/raw/master/ChatJax%2B%2B.user.js)
 
 While ChatJax++ has currently only been tested on Firefox + Greasemonkey and Chrome + Tampermonkey, it will probably work on other similar browsers like Opera.  Compatibility with Microsoft Edge has not been tested, and there's a pretty good chance that something won't work.  If you can test it, please [let me know](https://github.com/vyznev/chatjax/issues) if it works or not.  When reporting issues, please try to include any diagnostic output (especially any lines starting with "ChatJax++ error") printed to the browser's Developer Tools console; this will make anylyzing and reproducing the issue much easier.
